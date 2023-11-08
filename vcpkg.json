@@ -1,0 +1,33 @@
+{
+    "name": "orb-slam2-rewrite",
+    "version": "0.0.1",
+    "dependencies": [
+        "g2o",
+        "fmt",
+        "sophus",
+        "eigen3",
+        "spdlog",
+        "pangolin",
+        "opencv3",
+        "jsoncpp"
+    ],
+    "builtin-baseline": "01acfdfde3ed99280d3883a8fccd5fa4408f5214",
+    "overrides": [
+        {
+            "name": "opencv3",
+            "version": "3.4.16"
+        },
+        {
+            "name": "fmt",
+            "version": "8.1.0"
+        },
+        {
+            "name": "spdlog",
+            "version": "1.10.0"
+        },
+        {
+            "name": "jsoncpp",
+            "version": "1.9.5"
+        }
+    ]
+}
