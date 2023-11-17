@@ -1,3 +1,4 @@
 {
-    "PYRAMID_BORDER": 19
+    "PYRAMID_BORDER": 3,
+    "GAUSS_BLUR_SIGMA_X": 2.0
 }

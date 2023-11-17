@@ -6,12 +6,16 @@ NAMESAPCE_BEGIN
 
 class Config {
 public:
-    Config(const std::string &fp);
+    typedef std::shared_ptr<Config> Ptr;
+    Config();
+    static Ptr getInstance() {
+        static Ptr config(new Config);
+        return config;
+    }
 
 public:
-    int m_PYRAMID_BORDER; ///> 金字塔图像高斯模糊边界
-
-private:
+    static int m_PYRAMID_BORDER;
+    static double m_GAUSS_BLUR_SIGMA_X;
 };
 
 NAMESAPCE_END

@@ -34,3 +34,5 @@
 # vscode and build
 .vscode/
 build/
+bin/
+lib/
