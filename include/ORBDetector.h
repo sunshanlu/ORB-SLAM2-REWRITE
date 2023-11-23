@@ -17,10 +17,29 @@ public:
 
     bool detectFAST(const cv::Mat &area, const cv::Point &point, FASTFeature &feature, int threshold);
 
+    void detectORB(const cv::Mat &image, int num, int maxThreshold, int minThreshold);
+
+    // 单特征点灰度质心法
+    void centroidMethod(const cv::Mat &image, cv::KeyPoint &fastPoint);
+
+    // 多特征点灰度质心法
+    void centroidMethod(const cv::Mat &image, std::vector<cv::KeyPoint> &fastPoints);
+
+    // 单特征点计算描述子
+    void computeDescriptor(const cv::Mat &image, const cv::KeyPoint &fastPoint, std::bitset<256> &descriptor);
+
+    // 多特征点计算描述子
+    void computeDescriptor(const cv::Mat &image, const std::vector<cv::KeyPoint> &fastPoints,
+                           std::vector<std::bitset<256>> &descriptors);
+
 private:
-    static const int m_deltaXVec[16]; ///> FAST_16_9角点比较的X坐标
-    static const int m_deltaYVec[16]; ///> FAST_16_9角点比较的Y坐标
-    static const int m_speciId[4];    ///> FAST_16_9角点的特殊索引（比满足三个以上）
+    static const int m_deltaXVec[16];              ///> FAST_16_9角点比较的X坐标
+    static const int m_deltaYVec[16];              ///> FAST_16_9角点比较的Y坐标
+    static const int m_speciId[4];                 ///> FAST_16_9角点的特殊索引（比满足三个以上）
+    cv::Ptr<cv::FastFeatureDetector> fastDetector; ///> OpenCV的FAST特征点检测对象
+    std::vector<int> m_deltaMaxU;                  ///> 不同v下，U的最大值，用于计算灰度质心
 };
+
+void pixelCirclePos(int num, std::vector<int> &deltaMaxU);
 
 NAMESAPCE_END

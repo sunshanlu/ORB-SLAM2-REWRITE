@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 project(ORB-SLAME2-REWRITE CXX)
 
-set(CMAKE_BUILD_TYPE Release)
 set(DEPEND_LIBRARIES depend_libraries)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)

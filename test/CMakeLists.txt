@@ -34,6 +34,13 @@ add_executable(
         ${PROJECT_SOURCE_DIR}/src/ORBFeature.cpp)
 target_link_libraries(SIMD_test ${DEPEND_LIBRARIES})
 
+add_executable(drawCircle ${PROJECT_SOURCE_DIR}/test/drawCircle.cpp)
+target_link_libraries(drawCircle ${DEPEND_LIBRARIES})
+
+add_executable(keyPointAngle_test
+               ${PROJECT_SOURCE_DIR}/test/keyPointAngle_test.cpp)
+target_link_libraries(keyPointAngle_test ${DEPEND_LIBRARIES})
+
 # 检查 AVX 支持
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_AVX)

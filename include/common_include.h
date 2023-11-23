@@ -1,12 +1,13 @@
 #pragma once
 
+#include <bitset>
+#include <chrono>
+#include <cmath>
 #include <fstream>
+#include <list>
 #include <memory>
 #include <string>
 #include <vector>
-#include <cmath>
-#include <list>
-#include <chrono>
 
 #include <Eigen/Dense>
 #include <json/json.h>
