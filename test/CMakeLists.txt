@@ -41,6 +41,16 @@ add_executable(keyPointAngle_test
                ${PROJECT_SOURCE_DIR}/test/keyPointAngle_test.cpp)
 target_link_libraries(keyPointAngle_test ${DEPEND_LIBRARIES})
 
+add_executable(descriptor_test ${PROJECT_SOURCE_DIR}/test/descriptor_test.cpp
+                               ${PROJECT_SOURCE_DIR}/src/ORBDetector.cpp
+                               ${PROJECT_SOURCE_DIR}/src/ORBFeature.cpp
+                               ${PROJECT_SOURCE_DIR}/src/Config.cpp
+                               ${PROJECT_SOURCE_DIR}/src/CircleID.cpp)
+target_link_libraries(descriptor_test ${DEPEND_LIBRARIES})
+
+add_executable(matConstruct_test ${PROJECT_SOURCE_DIR}/test/matConstruct_test.cpp)
+target_link_libraries(matConstruct_test ${DEPEND_LIBRARIES})
+
 # 检查 AVX 支持
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_AVX)
