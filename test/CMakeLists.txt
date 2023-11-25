@@ -41,15 +41,25 @@ add_executable(keyPointAngle_test
                ${PROJECT_SOURCE_DIR}/test/keyPointAngle_test.cpp)
 target_link_libraries(keyPointAngle_test ${DEPEND_LIBRARIES})
 
-add_executable(descriptor_test ${PROJECT_SOURCE_DIR}/test/descriptor_test.cpp
-                               ${PROJECT_SOURCE_DIR}/src/ORBDetector.cpp
-                               ${PROJECT_SOURCE_DIR}/src/ORBFeature.cpp
-                               ${PROJECT_SOURCE_DIR}/src/Config.cpp
-                               ${PROJECT_SOURCE_DIR}/src/CircleID.cpp)
+add_executable(
+        descriptor_test
+        ${PROJECT_SOURCE_DIR}/test/descriptor_test.cpp
+        ${PROJECT_SOURCE_DIR}/src/ORBDetector.cpp
+        ${PROJECT_SOURCE_DIR}/src/ORBFeature.cpp
+        ${PROJECT_SOURCE_DIR}/src/Config.cpp
+        ${PROJECT_SOURCE_DIR}/src/CircleID.cpp)
 target_link_libraries(descriptor_test ${DEPEND_LIBRARIES})
 
-add_executable(matConstruct_test ${PROJECT_SOURCE_DIR}/test/matConstruct_test.cpp)
+add_executable(matConstruct_test
+               ${PROJECT_SOURCE_DIR}/test/matConstruct_test.cpp)
 target_link_libraries(matConstruct_test ${DEPEND_LIBRARIES})
+
+add_executable(
+        quadTree_test
+        ${PROJECT_SOURCE_DIR}/test/quadTree_test.cpp
+        ${PROJECT_SOURCE_DIR}/src/QuadTree.cpp)
+
+target_link_libraries(quadTree_test ${DEPEND_LIBRARIES})
 
 # 检查 AVX 支持
 include(CheckCXXCompilerFlag)

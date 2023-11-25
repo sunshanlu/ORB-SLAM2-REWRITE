@@ -1,6 +1,7 @@
 #include "Config.h"
 #include "ORBDetector.h"
 #include <opencv2/opencv.hpp>
+#include <bitset>
 
 // ORB_SLAM2 灰度质心法部分源码
 static float IC_Angle(const cv::Mat &image, cv::Point2f pt, const std::vector<int> &u_max) {
