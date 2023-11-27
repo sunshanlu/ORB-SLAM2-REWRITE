@@ -7,11 +7,19 @@ using namespace ORB_SLAM2_REWRITE;
 
 int main(int argc, char **argv) {
     cv::Mat image = cv::imread("/home/rookie-lu/Pictures/gaoda.jpeg", cv::IMREAD_GRAYSCALE);
-    std::vector<cv::KeyPoint> keypoints;
+    cv::Mat drawNotQuad = image.clone();
+    cv::Mat drawQuad = image.clone();
+    std::vector<cv::KeyPoint> keypoints, quadKeypoints;
     cv::FAST(image, keypoints, 20, true);
+    std::cout << keypoints.size() << std::endl;
 
-    cv::drawKeypoints(image, keypoints, image);
-    cv::imshow("image", image);
+    QuadTree quadTree(image, keypoints, 500);
+    quadTree.getKeyPoints(quadKeypoints);
+
+    cv::drawKeypoints(image, keypoints, drawNotQuad);
+    cv::drawKeypoints(image, quadKeypoints, drawQuad);
+    cv::imshow("drawNotQuad", drawNotQuad);
+    cv::imshow("drawQuad", drawQuad);
     cv::waitKey(0);
     cv::destroyAllWindows();
 }

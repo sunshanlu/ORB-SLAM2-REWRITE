@@ -30,7 +30,7 @@ private:
     QuadTreeNode *m_parent = nullptr;
     QuadTreeNode *m_children[4] = {nullptr};                     ///< 四个子节点指针
     float m_minX, m_maxX, m_minY, m_maxY;                        ///< 表示节点的矩形区域
-    std::set<const cv::KeyPoint *, ResponseCompare> m_keyPoints; ///< 该节点包含的所有特征点
+    std::multiset<const cv::KeyPoint *, ResponseCompare> m_keyPoints; ///< 该节点包含的所有特征点
 };
 
 /// 定义关键点数量比较器，要求在set中，数量多的在前
@@ -45,16 +45,24 @@ class QuadTree {
 public:
     QuadTree(const cv::Mat &image, const std::vector<cv::KeyPoint> &keypoints, int num);
 
+    ~QuadTree() {
+        for (auto node : m_allNodes) {
+            delete node;
+        }
+        m_allNodes.clear();
+    }
+
     bool getKeyPoints(std::vector<cv::KeyPoint> &keypoints);
 
 private:
     void split(QuadTreeNode *parent);
 
     QuadTreeNode *m_root;                               ///< 根节点
-    std::set<QuadTreeNode *, PointsNumCompare> m_nodes; ///< 目前没有子节点的节点
+    std::multiset<QuadTreeNode *, PointsNumCompare> m_nodes; ///< 目前没有子节点的节点
     int m_num;                                          ///< m_nodes中的节点数
     bool m_matchCond = true;                            ///< 是否满足要求num条件
     int m_reqNum;                                       ///< 要求的节点数
+    std::vector<QuadTreeNode *> m_allNodes;             ///< 存储所有构造在堆区的节点，以便进行析构
 };
 
 NAMESAPCE_END
