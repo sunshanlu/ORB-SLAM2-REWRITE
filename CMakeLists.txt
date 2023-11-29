@@ -1,9 +1,22 @@
 cmake_minimum_required(VERSION 3.18)
 project(ORB-SLAME2-REWRITE CXX)
 
+if(${CMAKE_BUILD_TYPE} STREQUAL "")
+        set(CMAKE_BUILD_TYPE "Debug")
+endif()
+
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+        message(STATUS "CMAKE_BUILD_TYPE is Debug")
+        set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin/Debug)
+        set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib/Debug)
+else()
+        set(CMAKE_BINARY_DIR ${PROJECT_SOURCE_DIR}/build/Release)
+        set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin/Release)
+        set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib/Release)
+endif()
+
 set(DEPEND_LIBRARIES depend_libraries)
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include_directories(${PROJECT_SOURCE_DIR}/include /usr/include/eigen3)
 

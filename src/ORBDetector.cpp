@@ -48,7 +48,7 @@ bool ORBDetector::detectFAST(const cv::Mat &area, const cv::Point &point, FASTFe
     double thresholdVal = threshold;
     std::vector<int> specMatchId;
     specMatchId.reserve(4);
-    int outThNum = 0, sepcOutThNum = 0;
+    int sepcOutThNum = 0;
     for (int idx = 0; idx < 4; ++idx) {
         // 特殊id的灰度值
         int pointValSpe = (int)area.at<uchar>(row + m_deltaYVec[m_speciId[idx]], col + m_deltaXVec[m_speciId[idx]]);
@@ -76,7 +76,7 @@ bool ORBDetector::detectFAST(const cv::Mat &area, const cv::Point &point, FASTFe
         }
     }
     // 判断初始化失败的情况（全为true）
-    if (setBeginID == false) {
+    if (!setBeginID) {
         feature.m_position.x = point.x;
         feature.m_position.y = point.y;
         feature.m_strength = 16;
@@ -94,7 +94,6 @@ bool ORBDetector::detectFAST(const cv::Mat &area, const cv::Point &point, FASTFe
         }
     }
     matchNum = matchNum > matchNum2 ? matchNum : matchNum2;
-    matchNum2 = 0;
     if (matchNum >= 9) {
         feature.m_position.x = point.x;
         feature.m_position.y = point.y;
@@ -106,13 +105,49 @@ bool ORBDetector::detectFAST(const cv::Mat &area, const cv::Point &point, FASTFe
 }
 
 /**
- * @brief 定义ORB特征点检测函数
+ * @brief 检测输入图像的ORB特征点
  *
- * @param image 待ORB特征检测输入图像
- * @param num   OBR特征点检测个数
+ * @note 将特征点在边界为16的位置进行剔除，防止描述子计算出错
+ *
+ * @param image         输入图像
+ * @param num           要求检测的特征点数量
+ * @param maxThreshold  最大FAST特征点阈值
+ * @param minThreshold  最小FAST特征点阈值
+ * @param outKeyPoints  输出特征点
+ * @return true         检测ORB特征点满足个数要求
+ * @return false        检测ORB特征点不满足个数要求
  */
-void ORBDetector::detectORB(const cv::Mat &image, int num, int maxThreshold, int minThreshold) {
-    // todo: to finish
+bool ORBDetector::detectORB(const cv::Mat &image, int num, int maxThreshold, int minThreshold,
+                            std::vector<cv::KeyPoint> &outKeyPoints) {
+    static int minX = 16, maxX = image.cols - 16, minY = 16, maxY = image.rows - 16;
+    std::vector<ImageCell> cells;
+    std::vector<cv::KeyPoint> allKeyPoints;
+
+    image2Cells(image, cells);
+    for (auto &cell : cells) {
+        std::vector<cv::KeyPoint> keyPoints;
+        cv::FAST(cell.m_area, keyPoints, maxThreshold, true);
+        // 如果FAST检测结果不够m_MIN_CELL_FAST_NUM，则使用更小的阈值进行检测
+        if (keyPoints.size() < Config::m_MIN_CELL_FAST_NUM) {
+            cv::FAST(cell.m_area, keyPoints, minThreshold, true);
+        }
+        for (auto &keyPoint : keyPoints) {
+            keyPoint.pt.x += cell.m_startPoint.x;
+            keyPoint.pt.y += cell.m_startPoint.y;
+        }
+        // 删除在边界为16的位置的FAST特征点，并进行特征点角度计算
+        if (keyPoints.size() > Config::m_MIN_CELL_FAST_NUM) {
+            std::copy_if(keyPoints.begin(), keyPoints.end(), std::back_inserter(allKeyPoints),
+                         [&image, this](cv::KeyPoint &kp) {
+                             return kp.pt.x >= minX && kp.pt.x <= maxX && kp.pt.y >= minY && kp.pt.y <= maxY;
+                         });
+        }
+    }
+    // 使用四叉树将FAST角点均匀分布到图像中
+    QuadTree quadTree(image, allKeyPoints, num);
+    bool ret = quadTree.getKeyPoints(outKeyPoints);
+    centroidMethod(image, outKeyPoints);
+    return ret;
 }
 
 /**
@@ -489,13 +524,70 @@ void ORBDetector::computeDescriptor(const cv::Mat &image, const std::vector<cv::
     }
 }
 
-ORBDetector::ORBDetector() {
-    m_fastDetector = cv::FastFeatureDetector::create(50, true);
-    pixelCirclePos(Config::m_HALF_IWC_PATCH_SIZE, m_deltaMaxU);
-}
+ORBDetector::ORBDetector() { pixelCirclePos(Config::m_HALF_IWC_PATCH_SIZE, m_deltaMaxU); }
 
 const int ORBDetector::m_deltaXVec[] = {0, 1, 2, 3, 3, 3, 2, 1, 0, -1, -2, -3, -3, -3, -2, -1};
 const int ORBDetector::m_deltaYVec[] = {-3, -3, -2, -1, 0, 1, 2, 3, 3, 3, 2, 1, 0, -1, -2, -3};
 const int ORBDetector::m_speciId[] = {0, 4, 8, 12};
+
+/**
+ * @brief 将图像image分成多层图像块，并放到cells中
+ *
+ * @note 注意，rowRange和colRange都是包含起始值，不包含终点值
+ * @param image 输入图像
+ * @param cells 输出图像块集合
+ */
+void image2Cells(const cv::Mat &image, std::vector<ImageCell> &cells) {
+    int rowNum = (image.rows - 6) / Config::m_CELL_PATCH_SIZE;
+    int colNum = (image.cols - 6) / Config::m_CELL_PATCH_SIZE;
+    int lastRow = (image.rows - 6) % Config::m_CELL_PATCH_SIZE;
+    int lastCol = (image.cols - 6) % Config::m_CELL_PATCH_SIZE;
+
+    int startRow = 0;
+    for (int row = 0; row < rowNum; ++row) {
+        int startCol = 0;
+        cv::Mat rowArea = image.rowRange(startRow, startRow + Config::m_CELL_PATCH_SIZE + 6);
+        for (int col = 0; col < colNum; ++col) {
+            ImageCell cell;
+            cell.m_startPoint = cv::Point(startCol, startRow);
+            cell.m_area = rowArea.colRange(startCol, startCol + Config::m_CELL_PATCH_SIZE + 6);
+            cells.push_back(cell);
+            startCol += Config::m_CELL_PATCH_SIZE;
+        }
+        startRow += Config::m_CELL_PATCH_SIZE;
+    }
+    if (lastRow > 4) {
+        startRow = Config::m_CELL_PATCH_SIZE * rowNum + 2;
+        cv::Mat rowArea = image.rowRange(startRow, image.rows);
+        int startCol = 0;
+        for (int col = 0; col < colNum; ++col) {
+            ImageCell cell;
+            cell.m_startPoint = cv::Point(startCol, startRow);
+            cell.m_area = rowArea.colRange(startCol, startCol + Config::m_CELL_PATCH_SIZE + 6);
+            cells.push_back(cell);
+            startCol += Config::m_CELL_PATCH_SIZE;
+        }
+    }
+    if (lastCol > 4) {
+        int startCol = Config::m_CELL_PATCH_SIZE * colNum + 2;
+        cv::Mat colArea = image.colRange(startCol, image.cols);
+        startRow = 0;
+        for (int row = 0; row < rowNum; ++row) {
+            ImageCell cell;
+            cell.m_startPoint = cv::Point(startCol, startRow);
+            cell.m_area = colArea.rowRange(startRow, startRow + Config::m_CELL_PATCH_SIZE + 6);
+            cells.push_back(cell);
+            startRow += Config::m_CELL_PATCH_SIZE;
+        }
+    }
+    if (lastRow > 4 && lastCol > 4) {
+        ImageCell cell;
+        startRow = Config::m_CELL_PATCH_SIZE * rowNum + 2;
+        int startCol = Config::m_CELL_PATCH_SIZE * colNum + 2;
+        cell.m_startPoint = cv::Point(startCol, startRow);
+        cell.m_area = image.rowRange(startRow, image.rows).colRange(startCol, image.cols);
+        cells.push_back(cell);
+    }
+}
 
 NAMESAPCE_END
