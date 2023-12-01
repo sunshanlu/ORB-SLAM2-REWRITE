@@ -58,7 +58,7 @@ bool detectFAST(const cv::Mat &area, const cv::Point &point, FASTFeature &featur
     mask = _mm_shuffle_epi8(mask, shuffleMask);
     _mm_storeu_si128((uchar16 *)diffPixel, mask);
 
-    // todo:判断4个特殊位置是否 
+    // todo:判断4个特殊位置是否
     int matchNum = 0, matchNum2 = 0;
     for (int id = 0; id < 16; ++id) {
         if (diffPixel[id]) {
@@ -96,10 +96,10 @@ int main() {
     cv::Mat img = createImg();
     cv::Point point(3, 3);
     FASTFeature feature;
-    ORBDetector detect;
+    ORBDetector::Ptr detect = ORBDetector::getInstance();
 
     auto t_point = std::chrono::steady_clock::now();
-    detect.detectFAST(img, point, feature, 5);
+    detect->detectFAST(img, point, feature, 5);
     std::cout << (std::chrono::steady_clock::now() - t_point).count() << std::endl;
 
     t_point = std::chrono::steady_clock::now();

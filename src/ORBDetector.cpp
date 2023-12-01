@@ -119,7 +119,7 @@ bool ORBDetector::detectFAST(const cv::Mat &area, const cv::Point &point, FASTFe
  */
 bool ORBDetector::detectORB(const cv::Mat &image, int num, int maxThreshold, int minThreshold,
                             std::vector<cv::KeyPoint> &outKeyPoints) {
-    static int minX = 16, maxX = image.cols - 16, minY = 16, maxY = image.rows - 16;
+    static int minX = 19, maxX = image.cols - 19, minY = 19, maxY = image.rows - 19;
     std::vector<ImageCell> cells;
     std::vector<cv::KeyPoint> allKeyPoints;
 
@@ -225,7 +225,7 @@ void pixelCirclePos(int halfPatchSize, std::vector<int> &deltaMaxU) {
  * @param fastPoint     待求解描述子的FAST特征点
  * @param descriptor    输出描述子(前提是输入前全置零)
  */
-void ORBDetector::computeDescriptor(const cv::Mat &image, const cv::KeyPoint &fastPoint, uchar *descriptor) {
+void ORBDetector::computeDescriptor(const cv::Mat &image, const cv::KeyPoint &fastPoint, Descriptor &descriptor) {
     // 使用预先选择的随机点集（256对点，可生成256bit的描述子）
     static int bit_pattern_31_[256 * 4] = {
         8,   -3,  9,   5 /*mean (0), correlation (0)*/,
@@ -486,26 +486,25 @@ void ORBDetector::computeDescriptor(const cv::Mat &image, const cv::KeyPoint &fa
         -1,  -6,  0,   -11 /*mean (0.127148), correlation (0.547401)*/
     };
     /// @note 在opencv的官网上要求，要求KeyPoint的angle的单位为角度，[0, 360)
-
     float sinThe = std::sin(fastPoint.angle / 180.0 * CV_PI);
     float cosThe = std::cos(fastPoint.angle / 180.0 * CV_PI);
-    int idx = 0;
-    for (int i = 0; i < 32; i++) {
-        for (int j = 0; j < 8; j++) {
-            const int &deltaX1 = bit_pattern_31_[idx];
-            const int &deltaY1 = bit_pattern_31_[idx + 1];
-            const int &deltaX2 = bit_pattern_31_[idx + 2];
-            const int &deltaY2 = bit_pattern_31_[idx + 3];
-            int deltaX1Trans = cvRound(deltaX1 * cosThe - deltaY1 * sinThe);
-            int deltaY1Trans = cvRound(deltaX1 * sinThe + deltaY1 * cosThe);
-            int deltaX2Trans = cvRound(deltaX2 * cosThe - deltaY2 * sinThe);
-            int deltaY2Trans = cvRound(deltaX2 * sinThe + deltaY2 * cosThe);
-            uchar pixelLeft = image.at<uchar>(fastPoint.pt.y + deltaY1Trans, fastPoint.pt.x + deltaX1Trans);
-            uchar pixelRight = image.at<uchar>(fastPoint.pt.y + deltaY2Trans, fastPoint.pt.x + deltaX2Trans);
-            uchar ret = pixelLeft < pixelRight ? 1 : 0;
-            descriptor[i] |= (ret << j);
-            idx += 4;
+
+    int bitsetIdx = 0;
+    for (int idx = 0; idx < 256 * 4; idx += 4) {
+        const int &deltaX1 = bit_pattern_31_[idx];
+        const int &deltaY1 = bit_pattern_31_[idx + 1];
+        const int &deltaX2 = bit_pattern_31_[idx + 2];
+        const int &deltaY2 = bit_pattern_31_[idx + 3];
+        int deltaX1Trans = cvRound(deltaX1 * cosThe - deltaY1 * sinThe);
+        int deltaY1Trans = cvRound(deltaX1 * sinThe + deltaY1 * cosThe);
+        int deltaX2Trans = cvRound(deltaX2 * cosThe - deltaY2 * sinThe);
+        int deltaY2Trans = cvRound(deltaX2 * sinThe + deltaY2 * cosThe);
+        uchar pixelLeft = image.at<uchar>(fastPoint.pt.y + deltaY1Trans, fastPoint.pt.x + deltaX1Trans);
+        uchar pixelRight = image.at<uchar>(fastPoint.pt.y + deltaY2Trans, fastPoint.pt.x + deltaX2Trans);
+        if (pixelLeft < pixelRight) {
+            descriptor.flip(bitsetIdx);
         }
+        ++bitsetIdx;
     }
 }
 
@@ -517,10 +516,10 @@ void ORBDetector::computeDescriptor(const cv::Mat &image, const cv::KeyPoint &fa
  * @param descriptors   输出描述子集合
  */
 void ORBDetector::computeDescriptor(const cv::Mat &image, const std::vector<cv::KeyPoint> &fastPoints,
-                                    cv::Mat &descriptors) {
-    descriptors = cv::Mat::zeros(fastPoints.size(), 32, CV_8UC1);
+                                    std::vector<Descriptor> &descriptors) {
+    descriptors.resize(fastPoints.size());
     for (int i = 0; i < fastPoints.size(); i++) {
-        computeDescriptor(image, fastPoints[i], descriptors.ptr(i));
+        computeDescriptor(image, fastPoints[i], descriptors[i]);
     }
 }
 

@@ -18,9 +18,9 @@ cv::Mat createImg() {
 
 int main() {
     cv::Mat img = createImg();
-    ORBDetector detector;
+    ORBDetector::Ptr detector = ORBDetector::getInstance();
     FASTFeature fast;
-    bool ret = detector.detectFAST(img, cv::Point(3, 3), fast, 20);
+    bool ret = detector->detectFAST(img, cv::Point(3, 3), fast, 20);
     std::cout << ret << std::endl;
     std::cout << fast.m_position << std::endl;
     std::cout << fast.m_strength << std::endl;
@@ -31,7 +31,7 @@ int main() {
     cv::Mat imageCV = cv::imread("/home/rookie-lu/Pictures/gaoda.jpeg", cv::IMREAD_GRAYSCALE);
     std::vector<FASTFeature::Ptr> features;
     auto t = std::chrono::steady_clock::now();
-    detector.detectFAST(image, features, 20);
+    detector->detectFAST(image, features, 20);
     std::cout << "自定义FAST时间: "
               << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - t).count()
               << std::endl;

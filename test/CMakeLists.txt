@@ -57,13 +57,21 @@ add_executable(detectORB_test ${PROJECT_SOURCE_DIR}/test/detectORB_test.cpp
                               ${SRC_FILE})
 target_link_libraries(detectORB_test ${DEPEND_LIBRARIES})
 
+add_executable(bitset_test ${PROJECT_SOURCE_DIR}/test/bitset_test.cpp
+                           ${SRC_FILE})
+target_link_libraries(bitset_test ${DEPEND_LIBRARIES})
+
+add_executable(matchInit_test ${PROJECT_SOURCE_DIR}/test/matchInit_test.cpp
+                              ${SRC_FILE})
+target_link_libraries(matchInit_test ${DEPEND_LIBRARIES})
+
 # 检查 AVX 支持
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_AVX)
 
 if(COMPILER_SUPPORTS_AVX)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-        message(STATUS "AVX supported, enabling AVX flags")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+    message(STATUS "AVX supported, enabling AVX flags")
 else()
-        message(STATUS "AVX not supported, no AVX flags enabled")
+    message(STATUS "AVX not supported, no AVX flags enabled")
 endif()

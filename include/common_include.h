@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bitset>
 #include <chrono>
 #include <cmath>
 #include <fstream>
@@ -20,3 +21,5 @@
 
 /// 命名空间结束宏
 #define NAMESAPCE_END }
+
+typedef std::bitset<256> Descriptor; ///< 将biset<256>作为描述子

@@ -1,7 +1,7 @@
 #include "Config.h"
 #include "ORBDetector.h"
-#include <opencv2/opencv.hpp>
 #include <bitset>
+#include <opencv2/opencv.hpp>
 
 // ORB_SLAM2 灰度质心法部分源码
 static float IC_Angle(const cv::Mat &image, cv::Point2f pt, const std::vector<int> &u_max) {
@@ -340,22 +340,22 @@ void computeDescriptors(const cv::Mat &image, std::vector<cv::KeyPoint> &keypoin
 }
 
 void printDescriptor(const cv::Mat &desc, int row) {
-    std::cout << std::bitset<8>(desc.at<uchar>(row, 0)) << std::bitset<8>(desc.at<uchar>(row, 1))
-              << std::bitset<8>(desc.at<uchar>(row, 2)) << std::bitset<8>(desc.at<uchar>(row, 3))
-              << std::bitset<8>(desc.at<uchar>(row, 4)) << std::bitset<8>(desc.at<uchar>(row, 5))
-              << std::bitset<8>(desc.at<uchar>(row, 6)) << std::bitset<8>(desc.at<uchar>(row, 7))
-              << std::bitset<8>(desc.at<uchar>(row, 8)) << std::bitset<8>(desc.at<uchar>(row, 9))
-              << std::bitset<8>(desc.at<uchar>(row, 10)) << std::bitset<8>(desc.at<uchar>(row, 11))
-              << std::bitset<8>(desc.at<uchar>(row, 12)) << std::bitset<8>(desc.at<uchar>(row, 13))
-              << std::bitset<8>(desc.at<uchar>(row, 14)) << std::bitset<8>(desc.at<uchar>(row, 15))
-              << std::bitset<8>(desc.at<uchar>(row, 16)) << std::bitset<8>(desc.at<uchar>(row, 17))
-              << std::bitset<8>(desc.at<uchar>(row, 18)) << std::bitset<8>(desc.at<uchar>(row, 19))
-              << std::bitset<8>(desc.at<uchar>(row, 20)) << std::bitset<8>(desc.at<uchar>(row, 21))
-              << std::bitset<8>(desc.at<uchar>(row, 22)) << std::bitset<8>(desc.at<uchar>(row, 23))
-              << std::bitset<8>(desc.at<uchar>(row, 24)) << std::bitset<8>(desc.at<uchar>(row, 25))
-              << std::bitset<8>(desc.at<uchar>(row, 26)) << std::bitset<8>(desc.at<uchar>(row, 27))
-              << std::bitset<8>(desc.at<uchar>(row, 28)) << std::bitset<8>(desc.at<uchar>(row, 29))
-              << std::bitset<8>(desc.at<uchar>(row, 30)) << std::bitset<8>(desc.at<uchar>(row, 31)) << std::endl;
+    std::cout << std::bitset<8>(desc.at<uchar>(row, 31)) << std::bitset<8>(desc.at<uchar>(row, 30))
+              << std::bitset<8>(desc.at<uchar>(row, 29)) << std::bitset<8>(desc.at<uchar>(row, 28))
+              << std::bitset<8>(desc.at<uchar>(row, 27)) << std::bitset<8>(desc.at<uchar>(row, 26))
+              << std::bitset<8>(desc.at<uchar>(row, 25)) << std::bitset<8>(desc.at<uchar>(row, 24))
+              << std::bitset<8>(desc.at<uchar>(row, 23)) << std::bitset<8>(desc.at<uchar>(row, 22))
+              << std::bitset<8>(desc.at<uchar>(row, 21)) << std::bitset<8>(desc.at<uchar>(row, 20))
+              << std::bitset<8>(desc.at<uchar>(row, 19)) << std::bitset<8>(desc.at<uchar>(row, 18))
+              << std::bitset<8>(desc.at<uchar>(row, 17)) << std::bitset<8>(desc.at<uchar>(row, 16))
+              << std::bitset<8>(desc.at<uchar>(row, 15)) << std::bitset<8>(desc.at<uchar>(row, 14))
+              << std::bitset<8>(desc.at<uchar>(row, 13)) << std::bitset<8>(desc.at<uchar>(row, 12))
+              << std::bitset<8>(desc.at<uchar>(row, 11)) << std::bitset<8>(desc.at<uchar>(row, 10))
+              << std::bitset<8>(desc.at<uchar>(row, 9)) << std::bitset<8>(desc.at<uchar>(row, 8))
+              << std::bitset<8>(desc.at<uchar>(row, 7)) << std::bitset<8>(desc.at<uchar>(row, 6))
+              << std::bitset<8>(desc.at<uchar>(row, 5)) << std::bitset<8>(desc.at<uchar>(row, 4))
+              << std::bitset<8>(desc.at<uchar>(row, 3)) << std::bitset<8>(desc.at<uchar>(row, 2))
+              << std::bitset<8>(desc.at<uchar>(row, 1)) << std::bitset<8>(desc.at<uchar>(row, 0)) << std::endl;
 }
 
 using namespace ORB_SLAM2_REWRITE;
@@ -390,13 +390,14 @@ int main(int argc, char **argv) {
         cv::Point2f pt = keypoints3[i].pt;
         keypoints3[i].angle = IC_Angle(image, pt, u_max);
     }
-    cv::Mat desc1, desc2, desc3;
+    cv::Mat desc1, desc3;
+    std::vector<std::bitset<256>> desc2;
     detectorCV->compute(image, keypoints1, desc1);
     detector->computeDescriptor(image, keypoints2, desc2);
     computeDescriptors(image, keypoints3, desc3, pattern);
 
     printDescriptor(desc1, 0);
-    printDescriptor(desc2, 0);
+    std::cout << desc2[0] << std::endl;
     printDescriptor(desc3, 0);
 
     return 0;

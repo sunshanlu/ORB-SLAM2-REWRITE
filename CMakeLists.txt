@@ -2,17 +2,17 @@ cmake_minimum_required(VERSION 3.18)
 project(ORB-SLAME2-REWRITE CXX)
 
 if(${CMAKE_BUILD_TYPE} STREQUAL "")
-        set(CMAKE_BUILD_TYPE "Debug")
+    set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
 if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-        message(STATUS "CMAKE_BUILD_TYPE is Debug")
-        set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin/Debug)
-        set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib/Debug)
+    message(STATUS "CMAKE_BUILD_TYPE is Debug")
+    set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin/Debug)
+    set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib/Debug)
 else()
-        set(CMAKE_BINARY_DIR ${PROJECT_SOURCE_DIR}/build/Release)
-        set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin/Release)
-        set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib/Release)
+    set(CMAKE_BINARY_DIR ${PROJECT_SOURCE_DIR}/build/Release)
+    set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin/Release)
+    set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib/Release)
 endif()
 
 set(DEPEND_LIBRARIES depend_libraries)
@@ -33,13 +33,13 @@ pkg_check_modules(JSONCPP jsoncpp REQUIRED IMPORTED_TARGET)
 
 add_library(${DEPEND_LIBRARIES} INTERFACE)
 target_link_libraries(
-        ${DEPEND_LIBRARIES}
-        INTERFACE fmt::fmt
-        INTERFACE ${OpenCV_LIBS}
-        INTERFACE spdlog::spdlog
-        INTERFACE ${Pangolin_LIBRARY}
-        INTERFACE PkgConfig::JSONCPP
-        INTERFACE ${G2O_LIBRARIES})
+    ${DEPEND_LIBRARIES}
+    INTERFACE fmt::fmt
+    INTERFACE ${OpenCV_LIBS}
+    INTERFACE spdlog::spdlog
+    INTERFACE ${Pangolin_LIBRARY}
+    INTERFACE PkgConfig::JSONCPP
+    INTERFACE ${G2O_LIBRARIES})
 
 # 注意add_subdirectory的位置，应该在需要依赖target的下方
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)

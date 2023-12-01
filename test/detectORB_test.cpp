@@ -13,8 +13,8 @@ int main(int argc, char **argv) {
     cv::Mat image = cv::imread("/home/rookie-lu/Pictures/gaoda.jpeg", cv::IMREAD_GRAYSCALE);
     cv::Mat drawKp_myself, drawKp_cv;
     Config::Ptr config = Config::getInstance();
-    ORBDetector detector;
-    detector.detectORB(image, 500, Config::m_FAST_THRESHOLD_MAX, Config::m_FAST_THRESHOLD_MIN, keypoints_myself);
+    ORBDetector::Ptr detector = ORBDetector::getInstance();
+    detector->detectORB(image, 500, Config::m_FAST_THRESHOLD_MAX, Config::m_FAST_THRESHOLD_MIN, keypoints_myself);
     orb->detect(image, keypoints_cv);
     cv::drawKeypoints(image, keypoints_myself, drawKp_myself);
     cv::drawKeypoints(image, keypoints_cv, drawKp_cv);
