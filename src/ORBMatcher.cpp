@@ -70,6 +70,7 @@ void ORBMatcher::matchFeatureToInit(const cv::Mat &image2, const std::vector<cv:
                                     const std::vector<cv::KeyPoint> &keyPoints2, const std::vector<Descriptor> &desc1,
                                     const std::vector<Descriptor> &desc2, std::vector<cv::DMatch> &matchIDs) {
     std::vector<std::vector<Grid::Ptr>> grids;
+    std::vector<cv::DMatch> matchCanIDs;
     Grid::initGrids(image2, keyPoints2, desc2, Config::m_GRID_WIDTH, Config::m_GRID_HEIGHT, grids);
 
     for (int idx = 0; idx < keyPoints1.size(); ++idx) {
@@ -84,8 +85,10 @@ void ORBMatcher::matchFeatureToInit(const cv::Mat &image2, const std::vector<cv:
         int bestDistance = 0;
         if (getBMByHamming(desc, desc2, candidatePointIds, bestCanID, bestDistance, Config::m_MATCH_DISTANCE_RATIO,
                            Config::m_MATCH_DISTANCE_THRESHOLD))
-            matchIDs.emplace_back(idx, bestCanID, 0, bestDistance);
+            matchCanIDs.emplace_back(idx, bestCanID, 0, bestDistance);
     }
+    buildHistogram(matchCanIDs, keyPoints1, keyPoints2, Config::m_HISTOGRAM_BIN_SIZE, Config::m_HISTOGRAM_CHOOSE_NUM,
+                   matchIDs);
 }
 
 /**
@@ -222,5 +225,32 @@ bool ORBMatcher::getBMByHamming(const Descriptor &desc, const std::vector<Descri
         return true;
     }
     return false;
+}
+
+void ORBMatcher::buildHistogram(const std::vector<cv::DMatch> &matches, const std::vector<cv::KeyPoint> &keypoints1,
+                                const std::vector<cv::KeyPoint> &keypoints2, const int binNum, const int chooseNum,
+                                std::vector<cv::DMatch> &goodMatches) {
+    assert(chooseNum > 0 && binNum > chooseNum && binNum <= 360 && "参数不合法");
+    static std::vector<std::vector<const cv::DMatch *>> histogram(binNum);
+    const static float angleStep = 360.f / binNum;
+
+    for (const auto &match : matches) {
+        float diffAngle = keypoints1[match.queryIdx].angle - keypoints2[match.trainIdx].angle;
+        diffAngle = diffAngle >= 0 ? diffAngle : diffAngle + 360.f; // diffAngle 在区间[0, 360)
+        histogram[(int)diffAngle / angleStep].push_back(&match);
+    }
+
+    // 采用部分冒泡排序算法，将含有最多匹配点的bin放到前面
+    partBubble(histogram, binNum, chooseNum);
+    for (int i = 0; i < chooseNum; ++i) {
+        for (auto &match : histogram[i]) {
+            goodMatches.push_back(*match);
+        }
+    }
+
+    // 将histogram清空
+    for (auto &bin : histogram) {
+        bin.clear();
+    }
 }
 NAMESAPCE_END

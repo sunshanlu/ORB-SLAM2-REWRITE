@@ -45,6 +45,11 @@ public:
                             const std::vector<cv::KeyPoint> &keyPoints2, const std::vector<Descriptor> &desc1,
                             const std::vector<Descriptor> &desc2, std::vector<cv::DMatch> &matchIDs);
 
+    // 构建直方图
+    void buildHistogram(const std::vector<cv::DMatch> &matches, const std::vector<cv::KeyPoint> &keypoints1,
+                        const std::vector<cv::KeyPoint> &keypoints2, const int binNum, const int chooseNum,
+                        std::vector<cv::DMatch> &goodMatches);
+
 private:
     ORBMatcher() = default; ///< 单例设计模式
 
@@ -72,6 +77,23 @@ private:
     // 通过指定的第一张图片特征点，在第二张图片中寻找候选的特征点ID
     void getCandidateIDs(std::vector<std::size_t> &candidateIDs, const cv::Mat &image2, const cv::KeyPoint &kp1,
                          const std::vector<std::vector<Grid::Ptr>> &grids, const std::vector<cv::KeyPoint> &keyPoints2);
+
+    /**
+     * @brief 部分冒牌排序，将前chooseNum个含有最多元素的bin排在前面
+     *
+     * @param histogram 输入的直方图
+     * @param binNum    直方图的长度
+     * @param chooseNum 指定要排序的bin的个数
+     */
+    template <typename T> void partBubble(std::vector<std::vector<T>> &histogram, int binNum, int chooseNum) {
+        for (int step = 0; step < chooseNum; ++step) {
+            for (int binID = binNum - 1; binID > step; --binID) {
+                if (histogram[binID].size() > histogram[binID - 1].size()) {
+                    std::swap(histogram[binID], histogram[binID - 1]);
+                }
+            }
+        }
+    }
 };
 
 NAMESAPCE_END

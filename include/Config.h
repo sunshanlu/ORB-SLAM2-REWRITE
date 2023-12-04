@@ -28,6 +28,8 @@ public:
     static int m_MATCH_HALF_WINDOW_SIZE;   ///< 关键点匹配的窗口半径
     static int m_MATCH_DISTANCE_THRESHOLD; ///< 关键点匹配的Hamming距离阈值
     static float m_MATCH_DISTANCE_RATIO;   ///< 关键点匹配的Hamming距离比值
+    static int m_HISTOGRAM_BIN_SIZE;       ///< 直方图的bin大小（用于特征匹配筛选）
+    static int m_HISTOGRAM_CHOOSE_NUM;     ///< 直方图选择个数（用于特征匹配筛选）
 };
 
 NAMESAPCE_END
