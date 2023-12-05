@@ -7,17 +7,14 @@ NAMESAPCE_BEGIN
 struct Grid {
     typedef std::shared_ptr<Grid> Ptr;
 
-    Grid(int minX, int maxX, int minY, int maxY, const std::vector<cv::KeyPoint> &keyPoints,
-         const std::vector<Descriptor> &descriptors);
+    Grid(int minX, int maxX, int minY, int maxY, const std::vector<cv::KeyPoint> &keyPoints);
 
-    static Ptr create(int minX, int maxX, int minY, int maxY, const std::vector<cv::KeyPoint> &keyPoints,
-                      const std::vector<Descriptor> &descriptors) {
-        Ptr grid(new Grid(minX, maxX, minY, maxY, keyPoints, descriptors));
+    static Ptr create(int minX, int maxX, int minY, int maxY, const std::vector<cv::KeyPoint> &keyPoints) {
+        Ptr grid(new Grid(minX, maxX, minY, maxY, keyPoints));
         return grid;
     }
 
-    static void initGrids(const cv::Mat &image, const std::vector<cv::KeyPoint> &keypoints,
-                          const std::vector<Descriptor> descriptors, int gridWidth, int gridHeight,
+    static void initGrids(const cv::Mat &image, const std::vector<cv::KeyPoint> &keypoints, int gridWidth, int gridHeight,
                           std::vector<std::vector<Ptr>> &grids);
 
     int m_minX, m_maxX, m_minY, m_maxY; ///< Grid的范围限定元素
@@ -47,7 +44,7 @@ public:
 
     // 构建直方图
     void buildHistogram(const std::vector<cv::DMatch> &matches, const std::vector<cv::KeyPoint> &keypoints1,
-                        const std::vector<cv::KeyPoint> &keypoints2, const int binNum, const int chooseNum,
+                        const std::vector<cv::KeyPoint> &keypoints2, const int &binNum, const int &chooseNum,
                         std::vector<cv::DMatch> &goodMatches);
 
 private:
@@ -64,9 +61,9 @@ private:
      * @param desc2 输入描述子2
      * @return int  输出两个描述子之间的hamming距离
      */
-    int hammingDistance(const Descriptor &desc1, const Descriptor &desc2) {
-        Descriptor compare = desc1 ^ desc2;
-        return compare.count();
+    static int hammingDistance(const Descriptor &desc1, const Descriptor &desc2) {
+        int distance = (int)(desc1 ^ desc2).count();
+        return distance;
     }
 
     // 根据Hamming距离来寻找最优匹配

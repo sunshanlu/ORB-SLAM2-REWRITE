@@ -3,7 +3,7 @@
 NAMESAPCE_BEGIN
 
 CircleID &CircleID::operator++() {
-    if (m_ID == m_maxVal){
+    if (m_ID == m_maxVal) {
         m_ID = 0;
         return *this;
     }

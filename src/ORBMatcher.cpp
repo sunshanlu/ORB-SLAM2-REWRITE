@@ -12,8 +12,7 @@ NAMESAPCE_BEGIN
  * @param maxY      Grid的最大Y
  * @param keyPoints 图像的所有关键点信息
  */
-Grid::Grid(int minX, int maxX, int minY, int maxY, const std::vector<cv::KeyPoint> &keyPoints,
-           const std::vector<Descriptor> &descriptors)
+Grid::Grid(int minX, int maxX, int minY, int maxY, const std::vector<cv::KeyPoint> &keyPoints)
     : m_minX(minX)
     , m_minY(minY)
     , m_maxX(maxX)
@@ -36,8 +35,7 @@ Grid::Grid(int minX, int maxX, int minY, int maxY, const std::vector<cv::KeyPoin
  * @param gridHeight    规定的Grid高度信息
  * @param grids         输出的Grid集合信息
  */
-void Grid::initGrids(const cv::Mat &image, const std::vector<cv::KeyPoint> &keypoints,
-                     const std::vector<Descriptor> descriptors, int gridWidth, int gridHeight,
+void Grid::initGrids(const cv::Mat &image, const std::vector<cv::KeyPoint> &keypoints, int gridWidth, int gridHeight,
                      std::vector<std::vector<Grid::Ptr>> &grids) {
     std::vector<int> rows, cols;
     for (int row = 0; row < image.rows; row += gridHeight)
@@ -49,7 +47,7 @@ void Grid::initGrids(const cv::Mat &image, const std::vector<cv::KeyPoint> &keyp
     for (int i = 0; i < rows.size() - 1; ++i) {
         std::vector<Ptr> rowGrids;
         for (int j = 0; j < cols.size() - 1; ++j) {
-            auto grid = Grid::create(cols[j], cols[j + 1], rows[i], rows[i + 1], keypoints, descriptors);
+            auto grid = Grid::create(cols[j], cols[j + 1], rows[i], rows[i + 1], keypoints);
             rowGrids.push_back(grid);
         }
         grids.push_back(rowGrids);
@@ -71,7 +69,7 @@ void ORBMatcher::matchFeatureToInit(const cv::Mat &image2, const std::vector<cv:
                                     const std::vector<Descriptor> &desc2, std::vector<cv::DMatch> &matchIDs) {
     std::vector<std::vector<Grid::Ptr>> grids;
     std::vector<cv::DMatch> matchCanIDs;
-    Grid::initGrids(image2, keyPoints2, desc2, Config::m_GRID_WIDTH, Config::m_GRID_HEIGHT, grids);
+    Grid::initGrids(image2, keyPoints2, Config::m_GRID_WIDTH, Config::m_GRID_HEIGHT, grids);
 
     for (int idx = 0; idx < keyPoints1.size(); ++idx) {
         std::vector<std::size_t> candidatePointIds;
@@ -191,7 +189,7 @@ void ORBMatcher::getGridID(int *gridID, const std::vector<std::vector<Grid::Ptr>
 bool ORBMatcher::getBMByHamming(const Descriptor &desc, const std::vector<Descriptor> &descs,
                                 const std::vector<std::size_t> &candidateIDs, std::size_t &bestCanID, int &outDistance,
                                 float ratio, int thresholdDistance) {
-    std::size_t bestID, secondBestID;
+    std::size_t bestID;
     int bestDistance, secondBestDistance;
 
     // 对bestID，secondBestID，bestDistance和secondBestDistance进行初始化
@@ -199,12 +197,10 @@ bool ORBMatcher::getBMByHamming(const Descriptor &desc, const std::vector<Descri
     int distance2 = hammingDistance(desc, descs[candidateIDs[1]]);
     if (distance1 < distance2) {
         bestID = 0;
-        secondBestID = 1;
         bestDistance = distance1;
         secondBestDistance = distance2;
     } else {
         bestID = 1;
-        secondBestID = 0;
         bestDistance = distance2;
         secondBestDistance = distance1;
     }
@@ -215,7 +211,6 @@ bool ORBMatcher::getBMByHamming(const Descriptor &desc, const std::vector<Descri
             bestID = idx;
             bestDistance = distance;
         } else if (distance < secondBestDistance) {
-            secondBestID = idx;
             secondBestDistance = distance;
         }
     }
@@ -227,8 +222,18 @@ bool ORBMatcher::getBMByHamming(const Descriptor &desc, const std::vector<Descri
     return false;
 }
 
+/**
+ * @brief 构建直方图，用于筛选匹配信息
+ * 构建直方图，并采用部分冒泡排序算法，将含有最多匹配的bin排在前面
+ * @param matches       候选匹配信息
+ * @param keypoints1    图像1的关键点信息
+ * @param keypoints2    图像2的关键点信息
+ * @param binNum        直方图的分段数
+ * @param chooseNum     直方图的bin按匹配数量排序，取前chooseNum个bin
+ * @param goodMatches   输出的最优匹配信息
+ */
 void ORBMatcher::buildHistogram(const std::vector<cv::DMatch> &matches, const std::vector<cv::KeyPoint> &keypoints1,
-                                const std::vector<cv::KeyPoint> &keypoints2, const int binNum, const int chooseNum,
+                                const std::vector<cv::KeyPoint> &keypoints2, const int &binNum, const int &chooseNum,
                                 std::vector<cv::DMatch> &goodMatches) {
     assert(chooseNum > 0 && binNum > chooseNum && binNum <= 360 && "参数不合法");
     static std::vector<std::vector<const cv::DMatch *>> histogram(binNum);

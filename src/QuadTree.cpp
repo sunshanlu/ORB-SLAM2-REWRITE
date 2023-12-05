@@ -11,13 +11,9 @@ NAMESAPCE_BEGIN
  * @param parent    父节点
  */
 QuadTreeNode::QuadTreeNode(float minX, float maxX, float minY, float maxY, QuadTreeNode *parent)
-    : m_parent(parent)
-    , m_minX(minX)
-    , m_maxX(maxX)
-    , m_minY(minY)
-    , m_maxY(maxY) {
+        : m_parent(parent), m_minX(minX), m_maxX(maxX), m_minY(minY), m_maxY(maxY) {
     assert(m_parent && "assert parent is not null");
-    for (const auto &keyPoint : m_parent->m_keyPoints) {
+    for (const auto &keyPoint: m_parent->m_keyPoints) {
         ///@note 采取边界剔除策略，不计入在边界上的特征点
         if (keyPoint->pt.x < m_maxX && keyPoint->pt.x > m_minX && keyPoint->pt.y > m_minY && keyPoint->pt.y < m_maxY) {
             m_keyPoints.insert(keyPoint);
@@ -35,11 +31,8 @@ QuadTreeNode::QuadTreeNode(float minX, float maxX, float minY, float maxY, QuadT
  * @param keypoints 关键点集合
  */
 QuadTreeNode::QuadTreeNode(float minX, float maxX, float minY, float maxY, const std::vector<cv::KeyPoint> &keypoints)
-    : m_minX(minX)
-    , m_maxX(maxX)
-    , m_minY(minY)
-    , m_maxY(maxY) {
-    for (const auto &keyPoint : keypoints) {
+        : m_minX(minX), m_maxX(maxX), m_minY(minY), m_maxY(maxY) {
+    for (const auto &keyPoint: keypoints) {
         m_keyPoints.insert(&keyPoint);
     }
 }
@@ -52,11 +45,11 @@ QuadTreeNode::QuadTreeNode(float minX, float maxX, float minY, float maxY, const
  * @param num       要求节点数
  */
 QuadTree::QuadTree(const cv::Mat &image, const std::vector<cv::KeyPoint> &keypoints, int num)
-    : m_reqNum(num) {
+        : m_reqNum(num) {
     m_root = new QuadTreeNode(0, image.cols, 0, image.rows, keypoints);
     m_allNodes.push_back(m_root);
     split(m_root);
-    for (auto &node : m_root->m_children) {
+    for (auto &node: m_root->m_children) {
         if (node->m_keyPoints.size() > 0) {
             m_nodes.insert(node);
             ++m_num;
@@ -66,15 +59,16 @@ QuadTree::QuadTree(const cv::Mat &image, const std::vector<cv::KeyPoint> &keypoi
     std::multiset<QuadTreeNode *, PointsNumCompare> tmpNodes;
     std::copy(m_nodes.begin(), m_nodes.end(), std::inserter(tmpNodes, tmpNodes.begin()));
     while (m_num < num) {
-        for (auto &node : tmpNodes) {
+        for (auto &node: tmpNodes) {
             if (node->m_keyPoints.size() == 1 || m_num >= num) {
                 break;
             }
             split(node);
-            auto removeIter = std::find_if(m_nodes.begin(), m_nodes.end(), [&node](QuadTreeNode *nodeTmp){return nodeTmp == node;});
+            auto removeIter = std::find_if(m_nodes.begin(), m_nodes.end(),
+                                           [&node](QuadTreeNode *nodeTmp) { return nodeTmp == node; });
             m_nodes.erase(removeIter); // 注意，这里需要将node从m_nodes中删除，保证m_nodes的意义
             --m_num;
-            for (auto &nodeChi : node->m_children) {
+            for (auto &nodeChi: node->m_children) {
                 if (nodeChi->m_keyPoints.size() > 0) {
                     m_nodes.insert(nodeChi);
                     ++m_num;
@@ -101,8 +95,8 @@ void QuadTree::split(QuadTreeNode *parent) {
     float medianY = parent->m_minY + (parent->m_maxY - parent->m_minY) / 2;
     float arrX[8] = {parent->m_minX, medianX, medianX, parent->m_maxX,
                      parent->m_minX, medianX, medianX, parent->m_maxX};
-    float arrY[8] = {parent->m_minY, medianY,        parent->m_minY, medianY,
-                     medianY,        parent->m_maxY, medianY,        parent->m_maxY};
+    float arrY[8] = {parent->m_minY, medianY, parent->m_minY, medianY,
+                     medianY, parent->m_maxY, medianY, parent->m_maxY};
     for (int i = 0; i < 4; i++) {
         QuadTreeNode *child = new QuadTreeNode(arrX[2 * i], arrX[2 * i + 1], arrY[2 * i], arrY[2 * i + 1], parent);
         m_allNodes.push_back(child);
@@ -126,7 +120,7 @@ bool QuadTree::getKeyPoints(std::vector<cv::KeyPoint> &keypoints) {
     }
 
     int n = 0;
-    for (const auto &node : m_nodes) {
+    for (const auto &node: m_nodes) {
         if (n++ == m_reqNum) {
             break;
         }

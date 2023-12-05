@@ -31,8 +31,9 @@
 *.out
 *.app
 
-# vscode and build
+# vscode and build and idea
 .vscode/
 build/
 bin/
 lib/
+.idea/

@@ -5,7 +5,7 @@ NAMESAPCE_BEGIN
 
 class CircleID {
 public:
-    CircleID(int maxVal)
+    explicit CircleID(int maxVal)
         : m_maxVal(maxVal - 1) {}
 
     CircleID &operator++();
@@ -17,8 +17,8 @@ public:
 
     int getValue() const { return m_ID; }
 
-    bool operator==(const CircleID &other) { return m_ID == other.m_ID; }
-    bool operator!=(const CircleID &other) { return !(*this == other); }
+    bool operator==(const CircleID &other) const { return m_ID == other.m_ID; }
+    bool operator!=(const CircleID &other) const { return !(*this == other); }
 
 private:
     int m_ID = 0;
