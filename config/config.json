@@ -1,4 +1,7 @@
 {
+    "DATASET_PATH": "/media/rookie-lu/DATA1/Dataset/KITTI-ODOM/00/",
+    "VOCAB_SAVE_PATH":"/home/rookie-lu/Project/ORB-SLAM/ORB-SLAM2-REWRITE/vocabulary/vocabulary.yml",
+    "VOCAB_LOAD_PATH":"/home/rookie-lu/Project/ORB-SLAM/ORB-SLAM2-REWRITE/vocabulary/vocabulary.yml",
     "GAUSS_BLUR_KERNEL_SIZE": 7,
     "GAUSS_BLUR_SIGMA_X": 2.0,
     "IWC_PATCH_SIZE": 31,
@@ -13,5 +16,5 @@
     "MATCH_DISTANCE_RATIO": 0.6,
     "MATCH_DISTANCE_THRESHOLD": 100,
     "HISTOGRAM_BIN_SIZE": 30,
-    "HISTOGRAM_CHOOSE_NUM": 3 
+    "HISTOGRAM_CHOOSE_NUM": 3
 }

@@ -12,6 +12,7 @@
 
 #include <DBoW2/DBoW2.h>
 #include <Eigen/Dense>
+#include <boost/filesystem.hpp>
 #include <json/json.h>
 #include <opencv2/opencv.hpp>
 #include <sophus/se3.hpp>

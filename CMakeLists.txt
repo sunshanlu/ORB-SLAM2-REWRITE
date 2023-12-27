@@ -29,6 +29,8 @@ find_package(G2O REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(Pangolin REQUIRED)
 find_package(PkgConfig REQUIRED)
+find_package(DBoW2 REQUIRED)
+find_package(Boost REQUIRED COMPONENTS filesystem)
 pkg_check_modules(JSONCPP jsoncpp REQUIRED IMPORTED_TARGET)
 
 add_library(${DEPEND_LIBRARIES} INTERFACE)
@@ -39,10 +41,13 @@ target_link_libraries(
     INTERFACE spdlog::spdlog
     INTERFACE ${Pangolin_LIBRARY}
     INTERFACE PkgConfig::JSONCPP
-    INTERFACE ${G2O_LIBRARIES})
+    INTERFACE ${G2O_LIBRARIES}
+    INTERFACE ${DBoW2_LIBRARIES}
+    INTERFACE Boost::filesystem)
 
 # 注意add_subdirectory的位置，应该在需要依赖target的下方
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)
+add_subdirectory(${PROJECT_SOURCE_DIR}/vocabulary)
 
 file(GLOB SRC_FILE ${PROJECT_SOURCE_DIR}/src/*.cpp)
 file(GLOB INCLUDE_FILE ${PROJECT_SOURCE_DIR}/include/*.h)

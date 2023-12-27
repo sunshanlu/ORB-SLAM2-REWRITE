@@ -70,9 +70,13 @@ void ORBMatcher::matchFeatureToInit(const cv::Mat &image2, const std::vector<cv:
     std::vector<std::vector<Grid::Ptr>> grids;
     std::vector<cv::DMatch> matchCanIDs;
     Grid::initGrids(image2, keyPoints2, Config::m_GRID_WIDTH, Config::m_GRID_HEIGHT, grids);
+    std::vector<const Descriptor *> desc2_ptr;
+    for (auto &desc : desc2) {
+        desc2_ptr.push_back(&desc);
+    }
 
     for (int idx = 0; idx < keyPoints1.size(); ++idx) {
-        std::vector<std::size_t> candidatePointIds;
+        std::vector<unsigned> candidatePointIds;
         const auto &kp1 = keyPoints1[idx];
         const auto &desc = desc1[idx];
         getCandidateIDs(candidatePointIds, image2, kp1, grids, keyPoints2);
@@ -81,7 +85,7 @@ void ORBMatcher::matchFeatureToInit(const cv::Mat &image2, const std::vector<cv:
         }
         std::size_t bestCanID;
         int bestDistance = 0;
-        if (getBMByHamming(desc, desc2, candidatePointIds, bestCanID, bestDistance, Config::m_MATCH_DISTANCE_RATIO,
+        if (getBMByHamming(desc, desc2_ptr, candidatePointIds, bestCanID, bestDistance, Config::m_MATCH_DISTANCE_RATIO,
                            Config::m_MATCH_DISTANCE_THRESHOLD))
             matchCanIDs.emplace_back(idx, bestCanID, 0, bestDistance);
     }
@@ -98,7 +102,7 @@ void ORBMatcher::matchFeatureToInit(const cv::Mat &image2, const std::vector<cv:
  * @param grids         输入初始化好的图片2的Grid集合
  * @param keyPoints2    图片2中的所有关键点信息
  */
-void ORBMatcher::getCandidateIDs(std::vector<std::size_t> &candidateIDs, const cv::Mat &image2, const cv::KeyPoint &kp1,
+void ORBMatcher::getCandidateIDs(std::vector<unsigned> &candidateIDs, const cv::Mat &image2, const cv::KeyPoint &kp1,
                                  const std::vector<std::vector<Grid::Ptr>> &grids,
                                  const std::vector<cv::KeyPoint> &keyPoints2) {
     assert(candidateIDs.empty() && "断言候选ID容器为空");
@@ -186,15 +190,15 @@ void ORBMatcher::getGridID(int *gridID, const std::vector<std::vector<Grid::Ptr>
  * @return true             表示找到了符合条件的最优候选描述子
  * @return false            未找到符合条件的候选描述子
  */
-bool ORBMatcher::getBMByHamming(const Descriptor &desc, const std::vector<Descriptor> &descs,
-                                const std::vector<std::size_t> &candidateIDs, std::size_t &bestCanID, int &outDistance,
+bool ORBMatcher::getBMByHamming(const Descriptor &desc, const std::vector<const Descriptor *> descs,
+                                const std::vector<unsigned> &candidateIDs, std::size_t &bestCanID, int &outDistance,
                                 float ratio, int thresholdDistance) {
     std::size_t bestID;
     int bestDistance, secondBestDistance;
 
     // 对bestID，secondBestID，bestDistance和secondBestDistance进行初始化
-    int distance1 = hammingDistance(desc, descs[candidateIDs[0]]);
-    int distance2 = hammingDistance(desc, descs[candidateIDs[1]]);
+    int distance1 = hammingDistance(desc, *descs[candidateIDs[0]]);
+    int distance2 = hammingDistance(desc, *descs[candidateIDs[1]]);
     if (distance1 < distance2) {
         bestID = 0;
         bestDistance = distance1;
@@ -206,7 +210,7 @@ bool ORBMatcher::getBMByHamming(const Descriptor &desc, const std::vector<Descri
     }
 
     for (std::size_t idx = 2; idx < candidateIDs.size(); ++idx) {
-        int distance = hammingDistance(desc, descs[candidateIDs[idx]]);
+        int distance = hammingDistance(desc, *descs[candidateIDs[idx]]);
         if (distance < bestDistance) {
             bestID = idx;
             bestDistance = distance;
@@ -267,21 +271,34 @@ void ORBMatcher::matchFeatureByBoW(Vocabulary &vocab, DBoW2::FeatureVector &feat
     FVector::iterator iterator2 = features2.begin();
     FVector::iterator iterator_end2 = features2.end();
 
+    Matches matchesNoFilter;
     while (iterator1 != iterator_end1 && iterator2 != iterator_end2) {
         if (iterator1->first == iterator2->first) {
             auto pointIds1 = iterator1->second;
             auto pointIds2 = iterator2->second;
-            for (int idx = 0; idx < pointIds1.size(); ++idx) {
-                
-
+            std::vector<const Descriptor *> desc2_ptr;
+            for (auto &idx : pointIds2) {
+                desc2_ptr.push_back(&desc2[idx]);
             }
-
+            for (int idx = 0; idx < pointIds1.size(); ++idx) {
+                Descriptor &desc = desc1[pointIds1[idx]];
+                std::size_t bestCanID;
+                int outDistance;
+                if (getBMByHamming(desc, desc2_ptr, pointIds2, bestCanID, outDistance, Config::m_MATCH_DISTANCE_RATIO,
+                                   Config::m_MATCH_DISTANCE_THRESHOLD)) {
+                    matchesNoFilter.emplace_back(idx, bestCanID, outDistance);
+                }
+            }
+            ++iterator1;
+            ++iterator2;
         } else if (iterator1->first > iterator2->first) { // 对齐操作
             ++iterator2;
         } else { // 对齐操作
             ++iterator1;
         }
     }
+    buildHistogram(matchesNoFilter, keypoints1, keypoints2, Config::m_HISTOGRAM_BIN_SIZE,
+                   Config::m_HISTOGRAM_CHOOSE_NUM, matches);
 }
 
 NAMESAPCE_END

@@ -14,6 +14,8 @@ Config::Config() {
     bool ret = Json::parseFromStream(builder, ifs, &root, &err);
     assert(ret == true);
 
+    m_DATASET_PATH = root["DATASET_PATH"].asString();
+    m_VOCAB_SAVE_PATH = root["VOCAB_SAVE_PATH"].asString();
     m_GAUSS_BLUR_KERNEL_SIZE = root["GAUSS_BLUR_KERNEL_SIZE"].asInt();
     m_GAUSS_BLUR_SIGMA_X = root["GAUSS_BLUR_SIGMA_X"].asDouble();
     m_IWC_PATCH_SIZE = root["IWC_PATCH_SIZE"].asInt();
@@ -33,6 +35,8 @@ Config::Config() {
     m_HISTOGRAM_CHOOSE_NUM = root["HISTOGRAM_CHOOSE_NUM"].asInt();
 }
 
+std::string Config::m_DATASET_PATH;
+std::string Config::m_VOCAB_SAVE_PATH;
 int Config::m_GAUSS_BLUR_KERNEL_SIZE;
 double Config::m_GAUSS_BLUR_SIGMA_X;
 int Config::m_IWC_PATCH_SIZE;

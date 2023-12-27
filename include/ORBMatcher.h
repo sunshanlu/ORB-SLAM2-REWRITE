@@ -72,12 +72,12 @@ private:
     }
 
     // 根据Hamming距离来寻找最优匹配
-    bool getBMByHamming(const Descriptor &desc, const std::vector<Descriptor> &descs,
-                        const std::vector<std::size_t> &candidateIDs, std::size_t &bestCanID, int &distance,
+    bool getBMByHamming(const Descriptor &desc, const std::vector<const Descriptor*> descs,
+                        const std::vector<unsigned> &candidateIDs, std::size_t &bestCanID, int &distance,
                         float ratio, int thresholdDistance);
 
     // 通过指定的第一张图片特征点，在第二张图片中寻找候选的特征点ID
-    void getCandidateIDs(std::vector<std::size_t> &candidateIDs, const cv::Mat &image2, const cv::KeyPoint &kp1,
+    void getCandidateIDs(std::vector<unsigned> &candidateIDs, const cv::Mat &image2, const cv::KeyPoint &kp1,
                          const std::vector<std::vector<Grid::Ptr>> &grids, const std::vector<cv::KeyPoint> &keyPoints2);
 
     /**
