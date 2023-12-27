@@ -56,12 +56,12 @@ void Grid::initGrids(const cv::Mat &image, const std::vector<cv::KeyPoint> &keyp
 
 /**
  * @brief 两张位姿相近的图片之间寻找特征匹配
- *
- * @param image2        被寻找特征匹配的图片
- * @param keyPoints1    图片1中的关键点信息
- * @param keyPoints2    图片2中的关键点信息
- * @param desc1         图片1中的描述子信息
- * @param desc2         图片2中的描述子信息
+ * cv::DMatch中的queryID是被匹配图像的ID，tarinID是待匹配图像的ID！！
+ * @param image2        待特征匹配的图片
+ * @param keyPoints1    被匹配图像的关键点信息
+ * @param keyPoints2    匹配图像的关键点信息
+ * @param desc1         被匹配图像的描述子信息
+ * @param desc2         待匹配图像的描述子信息
  * @param matchIDs      输出的匹配id信息cv::DMatch类型
  */
 void ORBMatcher::matchFeatureToInit(const cv::Mat &image2, const std::vector<cv::KeyPoint> &keyPoints1,
@@ -214,7 +214,7 @@ bool ORBMatcher::getBMByHamming(const Descriptor &desc, const std::vector<Descri
             secondBestDistance = distance;
         }
     }
-    bestCanID = bestID;
+    bestCanID = candidateIDs[bestID];
     outDistance = bestDistance;
     if ((float)bestDistance / secondBestDistance < ratio && bestDistance < thresholdDistance) {
         return true;
@@ -258,4 +258,30 @@ void ORBMatcher::buildHistogram(const std::vector<cv::DMatch> &matches, const st
         bin.clear();
     }
 }
+
+void ORBMatcher::matchFeatureByBoW(Vocabulary &vocab, DBoW2::FeatureVector &features1, FVector &features2,
+                                   Matches &matches, KeyPoints &keypoints1, KeyPoints &keypoints2, Descriptors &desc1,
+                                   Descriptors &desc2) {
+    FVector::iterator iterator1 = features1.begin();
+    FVector::iterator iterator_end1 = features1.end();
+    FVector::iterator iterator2 = features2.begin();
+    FVector::iterator iterator_end2 = features2.end();
+
+    while (iterator1 != iterator_end1 && iterator2 != iterator_end2) {
+        if (iterator1->first == iterator2->first) {
+            auto pointIds1 = iterator1->second;
+            auto pointIds2 = iterator2->second;
+            for (int idx = 0; idx < pointIds1.size(); ++idx) {
+                
+
+            }
+
+        } else if (iterator1->first > iterator2->first) { // 对齐操作
+            ++iterator2;
+        } else { // 对齐操作
+            ++iterator1;
+        }
+    }
+}
+
 NAMESAPCE_END

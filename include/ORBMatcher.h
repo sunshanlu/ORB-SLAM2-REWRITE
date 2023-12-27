@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Config.h"
 #include "common_include.h"
 
@@ -14,8 +15,8 @@ struct Grid {
         return grid;
     }
 
-    static void initGrids(const cv::Mat &image, const std::vector<cv::KeyPoint> &keypoints, int gridWidth, int gridHeight,
-                          std::vector<std::vector<Ptr>> &grids);
+    static void initGrids(const cv::Mat &image, const std::vector<cv::KeyPoint> &keypoints, int gridWidth,
+                          int gridHeight, std::vector<std::vector<Ptr>> &grids);
 
     int m_minX, m_maxX, m_minY, m_maxY; ///< Grid的范围限定元素
     std::vector<std::size_t> m_ids;     ///< Grid范围内对应的特征点ID和描述子ID
@@ -41,6 +42,10 @@ public:
     void matchFeatureToInit(const cv::Mat &image2, const std::vector<cv::KeyPoint> &keyPoints1,
                             const std::vector<cv::KeyPoint> &keyPoints2, const std::vector<Descriptor> &desc1,
                             const std::vector<Descriptor> &desc2, std::vector<cv::DMatch> &matchIDs);
+
+    // 通过词袋模型进行匹配
+    void matchFeatureByBoW(Vocabulary &vocab, DBoW2::FeatureVector &features1, FVector &features2, Matches &matches,
+                           KeyPoints &keypoints1, KeyPoints &keypoints2, Descriptors &desc1, Descriptors &desc2);
 
     // 构建直方图
     void buildHistogram(const std::vector<cv::DMatch> &matches, const std::vector<cv::KeyPoint> &keypoints1,

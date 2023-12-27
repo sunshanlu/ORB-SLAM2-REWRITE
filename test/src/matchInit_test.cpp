@@ -16,15 +16,15 @@ int main(int argc, char **argv) {
     ORBMatcher::Ptr matcher = ORBMatcher::getInstance();
     ORBDetector::Ptr detector = ORBDetector::getInstance();
 
-    auto detector_cv = cv::ORB::create(1500);
+    auto detector_cv = cv::ORB::create(500);
     cv::BFMatcher matcher_cv(cv::NORM_HAMMING);
 
     std::vector<cv::KeyPoint> keyPoints1, keyPoints2, keyPoints1_cv, keyPoints2_cv;
     std::vector<Descriptor> desc1, desc2;
     cv::Mat desc1_cv, desc2_cv;
 
-    detector->detectORB(image1, 1500, Config::m_FAST_THRESHOLD_MAX, Config::m_FAST_THRESHOLD_MIN, keyPoints1);
-    detector->detectORB(image2, 1500, Config::m_FAST_THRESHOLD_MAX, Config::m_FAST_THRESHOLD_MIN, keyPoints2);
+    detector->detectORB(image1, 500, Config::m_FAST_THRESHOLD_MAX, Config::m_FAST_THRESHOLD_MIN, keyPoints1);
+    detector->detectORB(image2, 500, Config::m_FAST_THRESHOLD_MAX, Config::m_FAST_THRESHOLD_MIN, keyPoints2);
     detector->computeDescriptor(image1, keyPoints1, desc1);
     detector->computeDescriptor(image2, keyPoints2, desc2);
 
@@ -43,6 +43,13 @@ int main(int argc, char **argv) {
     cv::imshow("match self", match_self);
     cv::waitKey(0);
     cv::destroyAllWindows();
+
+    for (auto &match_ret : matchId) {
+        unsigned queryID = match_ret.queryIdx;
+        unsigned trainID = match_ret.trainIdx;
+        fmt::print("{}\t{}\t{}\t{}\n", keyPoints1[trainID].pt.x, keyPoints1[trainID].pt.y, keyPoints2[queryID].pt.x,
+                   keyPoints2[queryID].pt.y);
+    }
 
     return 0;
 }
